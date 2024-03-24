@@ -1,0 +1,301 @@
+---
+title: "Biostat 100a Final Project"
+subtitle: "Fall 2023"
+author: "sctremartinez"
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+engine: knitr
+knitr:
+  opts_chunk: 
+    fig.align: 'center'
+    # fig.width: 6
+    # fig.height: 4
+    message: FALSE
+    cache: false
+
+---
+```{r}
+# Preliminaries
+
+setwd("~/Desktop/BIOSTATS 100A/")  # Set working directory
+library(ggplot2)  # Load ggplot2 for data visualization
+
+# Read data
+
+data <- read.csv("bs100_final_data.csv")
+
+#I Statement of Research Question:
+
+# The health outcome under consideration is Alcohol Use
+#  Please refer to the accompanying document for detailed results explanation.
+
+# II. Data Exploration and Visualization
+
+
+## A. Distribution of Alcohol Consumption
+
+ggplot(data = data, aes(x = alc)) +
+  geom_histogram(fill = "skyblue", color = "blue", bins = 30) +
+  ggtitle("Distribution of Alcohol Consumption") +
+  xlab("Alcohol Consumption (Days in a Year)") +
+  ylab("Frequency")
+
+# Summary statistics for alcohol consumption
+
+summary(data$alc) 
+
+## B. Bivariate Plots
+
+
+### 1. Scatter Plot - Alcohol Use vs. Health Literacy
+ggplot(data, aes(y = alc, x = health_lit)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+  ggtitle("Scatter Plot of Alcohol Use and Health Literacy") +
+  ylab("Alcohol Use") +
+  xlab("Health Literacy Score")
+
+### 2. Box Plot - Alcohol Use by Health Literacy Level
+
+ggplot(data, aes(x = factor(cut(health_lit, breaks = c(0, 18.99, 44.99, 60.99, 66))),
+                 y = alc)) +
+  geom_boxplot() +
+  ggtitle("Box Plot of Alcohol Use by Health Literacy") +
+  xlab("Health Literacy Level") +
+  ylab("Alcohol Use")
+
+
+
+# Feature Engineering
+
+## Binary Variable for High Health Literacy
+data$high_health_literacy <- ifelse(data$health_lit >= 45, 1, 0)
+
+# Splitting the dataset based on health literacy level
+low_data <- data[data$high_health_literacy == 0, ]
+high_data <- data[data$high_health_literacy == 1, ]
+
+
+# III. Description of Data and Additional Visualizations
+
+## a. Health Literacy Distribution
+# Visualizing the distribution of health literacy scores
+ggplot(data = data, aes(x = health_lit)) +
+  geom_histogram(fill = "skyblue", color = "blue", bins = 30) +
+  ggtitle("Distribution of Health Literacy") +
+  xlab("Health Literacy (score)") +
+  ylab("Frequency")
+
+## b. Distribution of Sex
+# Visualizing the distribution of sex within the dataset
+ggplot(data = data, aes(x = factor(sex))) +
+  geom_bar(fill = "skyblue", color = "blue") +
+  ggtitle("Distribution of Sex") +
+  xlab("Sex") +
+  ylab("Frequency") +
+  scale_x_discrete(labels = c("0" = "Male", "1" = "Female"))
+### Box Plot - Alcohol Use by Sex
+# Comparing alcohol use across different sexes
+ggplot(data, aes(x = factor(sex), y = alc)) +
+  geom_boxplot(fill = "skyblue", color = "blue") +
+  ggtitle("Box Plot of Alcohol Use by Sex") +
+  xlab("Sex") +
+  ylab("Alcohol Use") +
+  scale_x_discrete(labels = c("0" = "Male", "1" = "Female"))
+
+## c. Living Above Poverty Line (pol)
+# Distribution of individuals living above the poverty line
+ggplot(data, aes(x = factor(pol))) +
+  geom_bar(fill = "skyblue", color = "blue") +
+  ggtitle("Distribution of Living Above Poverty Line") +
+  xlab("Living Above Poverty Line") +
+  ylab("Frequency") +
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))
+
+### Box Plot - Alcohol Use by Living Above Poverty Line
+# Examining alcohol use in relation to living above the poverty line
+ggplot(data, aes(x = factor(pol), y = alc)) +
+  geom_boxplot(fill = "skyblue", color = "blue") +
+  ggtitle("Box Plot of Alcohol Use by Living Above Poverty Line") +
+  xlab("Living Above Poverty Line") +
+  ylab("Alcohol Use") +
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))
+
+## d. Daily Total Folate Intake (daily_fol)
+# Distribution of daily total folate intake among participants
+ggplot(data, aes(x = daily_fol)) +
+  geom_histogram(fill = "skyblue", color = "blue", bins = 30) +
+  ggtitle("Distribution of Daily Total Folate Intake") +
+  xlab("Daily Total Folate Intake (mcg)") +
+  ylab("Frequency")
+
+### Scatter Plot - Alcohol Use and Daily Total Folate Intake
+# Investigating the relationship between alcohol use and daily folate intake
+ggplot(data, aes(x = daily_fol, y = alc)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  ggtitle("Scatter Plot of Alcohol Use and Daily Total Folate Intake") +
+  xlab("Daily Total Folate Intake (mcg)") +
+  ylab("Alcohol Use")
+
+## e. Insurance Status (ins)
+# Distribution of insurance status among participants
+ggplot(data, aes(x = factor(ins))) +
+  geom_bar(fill = "skyblue", color = "blue") +
+  ggtitle("Distribution of Insurance Status") +
+  xlab("Insurance Status") +
+  ylab("Frequency") +
+  scale_x_discrete(labels = c("0" = "Public", "1" = "Private", "2" = "Uninsured"))
+
+### Box Plot - Alcohol Use by Insurance Status
+# Analyzing alcohol use across different insurance statuses
+ggplot(data, aes(x = factor(ins), y = alc)) +
+  geom_boxplot(fill = "skyblue", color = "blue") +
+  ggtitle("Box Plot of Alcohol Use by Insurance Status") +
+  xlab("Insurance Status") +
+  ylab("Alcohol Use") +
+  scale_x_discrete(labels = c("0" = "Public", "1" = "Private", "2" = "Uninsured"))
+
+## f. Education Level (educ)
+# Distribution of education levels among participants
+ggplot(data, aes(x = factor(educ))) +
+  geom_bar(fill = "skyblue", color = "blue") +
+  ggtitle("Distribution of Education Level") +
+  xlab("Education Level") +
+  ylab("Frequency") +
+  scale_x_discrete(labels = c("0" = "Elementary", "1" = "High School",
+  "2" = "Some College", "3" = "College Degree", "4" = "Graduate Degree"))
+
+### Box Plot - Alcohol Use by Education level
+# Analyzing alcohol use across education levels
+ggplot(data, aes(x = factor(educ), y = alc)) +
+  geom_boxplot(fill = "skyblue", color = "blue") +
+  ggtitle("Box Plot of Alcohol Use by Education Level") +
+  xlab("Education Level") +
+  ylab("Alcohol Use") +
+  scale_x_discrete(labels = c("0" = "Elementary", "1" = "High School", "2" = "Some College", "3" = "College Degree", "4" = "Graduate Degree"))
+
+
+
+
+# Analysis of Sample Characteristics and Statistical Testing
+
+# IV. Sample Characteristics by Health Literacy and Other Variables
+
+## Sex Distribution and Association with Health Literacy
+# Count and percentage distribution of sex within the sample
+cat("Distribution of Sex (N and %):\n")
+print(table(data$sex))
+print(prop.table(table(data$sex)) * 100)
+
+# Association of Sex with High Health Literacy
+# Calculating percentages and counts by high health literacy
+percent_sex_by_high_health_literacy <- prop.table(table(data$high_health_literacy, data$sex), margin = 1) * 100
+counts_sex_by_high_health_literacy <- table(data$high_health_literacy, data$sex)
+
+cat("Counts of Sex by High Health Literacy:\n")
+print(counts_sex_by_high_health_literacy)
+cat("Percentage of Sex by High Health Literacy:\n")
+print(percent_sex_by_high_health_literacy)
+
+# Chi-square test for independence between sex and high health literacy
+chi_square_sex <- chisq.test(table(data$high_health_literacy, data$sex))
+cat("P-value for Chi-square test between Sex and High Health Literacy:", chi_square_sex$p.value, "\n\n")
+
+# Analysis for 'pol' (Living Above Poverty Line
+# Distribution and Percentage of Living Above Poverty Line
+cat("Distribution of Living Above Poverty Line (N and %):\n")
+print(table(data$pol))
+print(prop.table(table(data$pol)) * 100)
+
+# Association of Living Above Poverty Line with High Health Literacy
+percent_pol_by_high_health_literacy <- prop.table(table(data$high_health_literacy, data$pol), margin = 1) * 100
+counts_pol_by_high_health_literacy <- table(data$high_health_literacy, data$pol)
+
+cat("Counts of Living Above Poverty Line by High Health Literacy:\n")
+print(counts_pol_by_high_health_literacy)
+cat("Percentage of Living Above Poverty Line by High Health Literacy:\n")
+print(percent_pol_by_high_health_literacy)
+
+# Chi-square test for independence
+chi_square_pol <- chisq.test(table(data$high_health_literacy, data$pol))
+cat("P-value for Chi-square test between Living Above Poverty Line and High Health Literacy:", chi_square_pol$p.value, "\n\n")
+
+
+## Daily Folate Intake Analysis
+# Mean and standard deviation for daily folate intake
+cat("Mean and SD of Daily Folate Intake for All, High Literacy, and Low Literacy Groups:\n")
+print(c(mean = mean(data$daily_fol), sd = sd(data$daily_fol)))
+print(c(high_literacy_mean = mean(high_data$daily_fol), high_literacy_sd = sd(high_data$daily_fol)))
+print(c(low_literacy_mean = mean(low_data$daily_fol), low_literacy_sd = sd(low_data$daily_fol)))
+
+# T-test for difference in folate intake between high and low health literacy groups
+t_test_folate <- t.test(high_data$daily_fol, low_data$daily_fol)
+cat("P-value for T-test on Folate Intake by Health Literacy Group:", t_test_folate$p.value, "\n\n")
+
+## Insurance Status Analysis
+# Distribution and Percentage of Insurance Status
+cat("Distribution of Insurance Status (N and %):\n")
+print(table(data$ins))
+print(prop.table(table(data$ins)) * 100)
+
+# Association of Insurance Status with High Health Literacy
+percent_ins_by_high_health_literacy <- prop.table(table(data$high_health_literacy, data$ins), margin = 1) * 100
+counts_ins_by_high_health_literacy <- table(data$high_health_literacy, data$ins)
+
+cat("Counts of Insurance Status by High Health Literacy:\n")
+print(counts_ins_by_high_health_literacy)
+cat("Percentage of Insurance Status by High Health Literacy:\n")
+print(percent_ins_by_high_health_literacy)
+
+# Chi-square test for independence
+chi_square_ins <- chisq.test(table(data$high_health_literacy, data$ins))
+cat("P-value for Chi-square test between Insurance Status and High Health Literacy:", chi_square_ins$p.value, "\n\n")
+
+
+## Education Level Analysis
+# Distribution and Percentage of Education Level
+cat("Distribution of Education Level (N and %):\n")
+print(table(data$educ))
+print(prop.table(table(data$educ)) * 100)
+
+# Association of Education Level with High Health Literacy
+percent_educ_by_high_health_literacy <- prop.table(table(data$high_health_literacy, data$educ), margin = 1) * 100
+counts_educ_by_high_health_literacy <- table(data$high_health_literacy, data$educ)
+
+cat("Counts of Education Level by High Health Literacy:\n")
+print(counts_educ_by_high_health_literacy)
+cat("Percentage of Education Level by High Health Literacy:\n")
+print(percent_educ_by_high_health_literacy)
+
+# Chi-square test for independence
+chi_square_educ <- chisq.test(table(data$high_health_literacy, data$educ))
+cat("P-value for Chi-square test between Education Level and High Health Literacy:", chi_square_educ$p.value, "\n\n")
+
+
+## Alcohol Use Analysis
+# Summary statistics for alcohol use across different health literacy groups
+cat("Summary Statistics for Alcohol Use:\n")
+print(c(mean_all = mean(data$alc), sd_all = sd(data$alc)))
+print(c(mean_high_literacy = mean(high_data$alc), sd_high_literacy = sd(high_data$alc)))
+print(c(mean_low_literacy = mean(low_data$alc), sd_low_literacy = sd(low_data$alc)))
+
+# T-test for difference in alcohol use between high and low health literacy groups
+t_test_alcohol <- t.test(high_data$alc, low_data$alc)
+cat("P-value for T-test on Alcohol Use by Health Literacy Group:", t_test_alcohol$p.value, "\n\n")
+
+# V. Linear Regression Model Predicting Health Literacy from Alcohol Consumption
+
+reg_model <- lm(health_lit ~ alc, data = data)
+cat("Summary of Linear Regression Model:\n")
+print(summary(reg_model))
+cat("R-squared value:", summary(reg_model)$r.squared, "\n")
+```
+---
